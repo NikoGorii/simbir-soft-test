@@ -96,13 +96,14 @@ module.exports = {
     ],
     'no-shadow': 'off',
     'no-use-before-define': 'off',
+    'object-curly-newline': 'off',
     'operator-linebreak': 'off',
     'prettier/prettier': [
       'error',
       {
         arrowParens: 'always',
         jsxSingleQuote: false,
-        'max-len': ['error', 140, 2],
+        'max-len': ['error', 120, 2],
         singleQuote: true,
         tabWidth: 2,
         trailingComma: 'all',

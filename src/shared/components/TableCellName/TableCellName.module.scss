@@ -1,0 +1,21 @@
+.container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  &.reverse {
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+
+    .logoWrapper {
+      margin-right: 50px;
+      margin-left: 0;
+    }
+  }
+}
+
+.logoWrapper {
+  margin-left: 50px;
+  min-width: 100px;
+}
+
