@@ -112,7 +112,7 @@ export const CompetitionMatches: VFC = () => {
   const { fetchService } = useAppContext();
   const params = useParams();
 
-  const { data, isLoading } = useQuery(['matches', params.id], () =>
+  const { data, isLoading } = useQuery(['competitionMatches', params.id], () =>
     fetchService.fetch<RootObject>(
       `http://api.football-data.org/v2/competitions/${params.id}/matches`,
     ),

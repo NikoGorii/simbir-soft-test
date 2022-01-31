@@ -110,10 +110,12 @@ export const Competitions: VFC = () => {
                   key={competition.id}
                   onClick={async () => {
                     try {
-                      const resp = await queryClient.fetchQuery('matches', () =>
-                        fetchService.fetch(
-                          `http://api.football-data.org/v2/competitions/${competition.id}/matches`,
-                        ),
+                      const resp = await queryClient.fetchQuery(
+                        'competitionMatches',
+                        () =>
+                          fetchService.fetch(
+                            `http://api.football-data.org/v2/competitions/${competition.id}/matches`,
+                          ),
                       );
                       if ('errorCode' in resp) {
                         // eslint-disable-next-line no-console
