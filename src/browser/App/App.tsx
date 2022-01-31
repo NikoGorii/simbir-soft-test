@@ -36,8 +36,13 @@ export const App: VFC = () => (
                 <Route element={<Matches />} path="matches" />
               </Route>
             </Route>
-            <Route element={<Teams />} path="teams" />
-            <Route element={<Matches />} path="matches" />
+            <Route path="teams">
+              <Route index element={<Teams />} />
+              <Route path=":id">
+                <Route index element={<Navigate to="/teams" />} />
+                <Route element={<div />} path="matches" />
+              </Route>
+            </Route>
           </Route>
         </Routes>
       </BrowserRouter>

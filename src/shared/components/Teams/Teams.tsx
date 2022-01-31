@@ -9,7 +9,8 @@ import {
   TableRow,
 } from '@mui/material';
 import { VFC } from 'react';
-import { useQuery } from 'react-query';
+import { useQuery, useQueryClient } from 'react-query';
+import { useNavigate } from 'react-router-dom';
 
 import { useAppContext } from '../../hooks/useAppContext';
 import { TableCellName } from '../TableCellName';
@@ -51,6 +52,8 @@ export interface RootObject {
 
 export const Teams: VFC = () => {
   const { fetchService } = useAppContext();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const { data, isLoading } = useQuery('teams', () =>
     fetchService.fetch<RootObject>('https://api.football-data.org/v2/teams/'),
@@ -76,7 +79,28 @@ export const Teams: VFC = () => {
           </TableHead>
           <TableBody>
             {data?.teams.map((team) => (
-              <TableRow key={team.id}>
+              <TableRow
+                hover
+                key={team.id}
+                onClick={async () => {
+                  try {
+                    const resp = await queryClient.fetchQuery('matches', () =>
+                      fetchService.fetch(
+                        `http://api.football-data.org/v2/teams/${team.id}/matches`,
+                      ),
+                    );
+                    if ('errorCode' in resp) {
+                      // eslint-disable-next-line no-console
+                      console.warn('======?>', resp);
+                    } else {
+                      navigate(`/teams/${team.id}/matches`);
+                    }
+                  } catch (e) {
+                    // eslint-disable-next-line no-console
+                    console.warn(e);
+                  }
+                }}
+              >
                 <TableCell component="th" scope="row">
                   <TableCellName reverse name={team.name} url={team.crestUrl} />
                 </TableCell>

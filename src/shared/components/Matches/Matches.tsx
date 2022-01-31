@@ -13,7 +13,8 @@ import { useQuery } from 'react-query';
 import { useParams } from 'react-router-dom';
 
 import { useAppContext } from '../../hooks/useAppContext';
-import styles from '../Competitions/Competitions.module.scss';
+
+import styles from './Matches.module.scss';
 
 export interface Filters {
   dateFrom: string;
@@ -131,14 +132,26 @@ export const Matches: VFC = () => {
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell>Название лиги</TableCell>
-              <TableCell>Дивизион</TableCell>
-              <TableCell>Дата соревнования</TableCell>
+              <TableCell>Счёт</TableCell>
+              <TableCell>Команды участники</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {data?.matches.map((match) => (
-              <TableRow key={match.id} />
+              <TableRow key={match.id}>
+                <TableCell component="th" scope="row">
+                  <div className={styles.score}>
+                    <div>{match.score.fullTime.awayTeam}</div>&nbsp;:&nbsp;
+                    <div>{match.score.fullTime.homeTeam}</div>
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <div className={styles.score}>
+                    <div>{match.homeTeam.name}</div>&nbsp;:&nbsp;
+                    <div>{match.awayTeam.name}</div>
+                  </div>
+                </TableCell>
+              </TableRow>
             ))}
           </TableBody>
         </Table>
