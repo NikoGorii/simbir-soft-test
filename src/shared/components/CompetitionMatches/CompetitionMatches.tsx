@@ -14,7 +14,7 @@ import { useParams } from 'react-router-dom';
 
 import { useAppContext } from '../../hooks/useAppContext';
 
-import styles from './Matches.module.scss';
+import styles from './CompetitionMatches.module.scss';
 
 export interface Filters {
   dateFrom: string;
@@ -108,7 +108,7 @@ export interface RootObject {
   matches: Match[];
 }
 
-export const Matches: VFC = () => {
+export const CompetitionMatches: VFC = () => {
   const { fetchService } = useAppContext();
   const params = useParams();
 
