@@ -102,54 +102,52 @@ export const Competitions: VFC = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {data?.competitions
-              .filter((competition) => ['WC'].includes(competition.code))
-              .map((competition) => (
-                <TableRow
-                  hover
-                  key={competition.id}
-                  onClick={async () => {
-                    try {
-                      const resp = await queryClient.fetchQuery(
-                        'competitionMatches',
-                        () =>
-                          fetchService.fetch(
-                            `http://api.football-data.org/v2/competitions/${competition.id}/matches`,
-                          ),
-                      );
-                      if ('errorCode' in resp) {
-                        // eslint-disable-next-line no-console
-                        console.warn('======?>', resp);
-                      } else {
-                        navigate(`/competitions/${competition.id}/matches`);
-                      }
-                    } catch (e) {
+            {data?.competitions.map((competition) => (
+              <TableRow
+                hover
+                key={competition.id}
+                onClick={async () => {
+                  try {
+                    const resp = await queryClient.fetchQuery(
+                      'competitionMatches',
+                      () =>
+                        fetchService.fetch(
+                          `http://api.football-data.org/v2/competitions/${competition.id}/matches`,
+                        ),
+                    );
+                    if ('errorCode' in resp) {
                       // eslint-disable-next-line no-console
-                      console.warn(e);
+                      console.warn('======?>', resp);
+                    } else {
+                      navigate(`/competitions/${competition.id}/matches`);
                     }
-                  }}
-                >
-                  <TableCell component="th" scope="row">
-                    <TableCellName
-                      name={competition.name}
-                      url={competition.emblemUrl}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    {competition.plan in ECurrentSeasonNames
-                      ? ECurrentSeasonNames[competition.plan]
-                      : competition.plan}
-                  </TableCell>
-                  <TableCell>
-                    {!!competition.currentSeason?.startDate &&
-                      format(
-                        new Date(competition.currentSeason.startDate),
-                        'dd-MMM-yyyy',
-                        { locale: ru },
-                      )}
-                  </TableCell>
-                </TableRow>
-              ))}
+                  } catch (e) {
+                    // eslint-disable-next-line no-console
+                    console.warn(e);
+                  }
+                }}
+              >
+                <TableCell component="th" scope="row">
+                  <TableCellName
+                    name={competition.name}
+                    url={competition.emblemUrl}
+                  />
+                </TableCell>
+                <TableCell>
+                  {competition.plan in ECurrentSeasonNames
+                    ? ECurrentSeasonNames[competition.plan]
+                    : competition.plan}
+                </TableCell>
+                <TableCell>
+                  {!!competition.currentSeason?.startDate &&
+                    format(
+                      new Date(competition.currentSeason.startDate),
+                      'dd-MMM-yyyy',
+                      { locale: ru },
+                    )}
+                </TableCell>
+              </TableRow>
+            ))}
           </TableBody>
         </Table>
       </TableContainer>

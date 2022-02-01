@@ -1,0 +1,1 @@
+export { TeamsMatches } from './TeamsMatches';

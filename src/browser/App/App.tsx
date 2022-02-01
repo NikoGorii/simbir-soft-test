@@ -7,6 +7,7 @@ import { CompetitionMatches } from '../../shared/components/CompetitionMatches';
 import { Competitions } from '../../shared/components/Competitions';
 import { Header } from '../../shared/components/Header';
 import { Teams } from '../../shared/components/Teams';
+import { TeamsMatches } from '../../shared/components/TeamsMatches';
 import { AppContextProvider } from '../../shared/utils/AppContext';
 
 const queryClient = new QueryClient({
@@ -29,6 +30,7 @@ export const App: VFC = () => (
         <Header />
         <Routes>
           <Route path="/">
+            <Route index element={<Navigate to="/competitions" />} />
             <Route path="competitions">
               <Route index element={<Competitions />} />
               <Route path=":id">
@@ -40,7 +42,7 @@ export const App: VFC = () => (
               <Route index element={<Teams />} />
               <Route path=":id">
                 <Route index element={<Navigate to="/teams" />} />
-                <Route element={<div />} path="matches" />
+                <Route element={<TeamsMatches />} path="matches" />
               </Route>
             </Route>
           </Route>
