@@ -3,19 +3,17 @@ import { VFC } from 'react';
 import styles from './TableCellSpace.module.scss';
 
 type TableCellSpaceProps = {
-  homeTeam: string;
-  awayTeam: string;
-  score: string;
+  left: string;
+  right: string;
 };
-// какие пропсы использовать и как их привязать к дивам?
-// как использовать компоненту в файле?
+
 export const TableCellSpace: VFC<TableCellSpaceProps> = (props) => {
-  const { homeTeam, awayTeam, score } = props;
+  const { right, left } = props;
 
   return (
     <div className={styles.score}>
-      <div>{homeTeam || score}</div>&nbsp;:&nbsp;
-      <div>{awayTeam || score}</div>
+      <div>{left}</div>&nbsp;:&nbsp;
+      <div>{right}</div>
     </div>
   );
 };

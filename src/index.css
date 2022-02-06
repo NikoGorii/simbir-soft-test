@@ -17,6 +17,8 @@ body {
 #root {
   height: 100%;
   width: 100%;
+  display: grid;
+  grid-template-rows: 49px 1fr;
 }
 
 code {

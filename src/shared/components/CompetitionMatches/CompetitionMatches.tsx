@@ -1,20 +1,10 @@
-import {
-  CircularProgress,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-} from '@mui/material';
+import { Table } from 'antd';
 import { VFC } from 'react';
 import { useQuery } from 'react-query';
 import { useParams } from 'react-router-dom';
 
 import { useAppContext } from '../../hooks/useAppContext';
-
-import styles from './CompetitionMatches.module.scss';
+import { TableCellSpace } from '../TableCellSpace';
 
 export interface Filters {
   dateFrom: string;
@@ -118,44 +108,88 @@ export const CompetitionMatches: VFC = () => {
     ),
   );
 
-  if (isLoading) {
-    return (
-      <div className={styles.container}>
-        <CircularProgress color="secondary" />
-      </div>
-    );
-  }
-
   return (
-    <div>
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>Счёт</TableCell>
-              <TableCell>Команды участники</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {data?.matches.map((match) => (
-              <TableRow key={match.id}>
-                <TableCell component="th" scope="row">
-                  <div className={styles.score}>
-                    <div>{match.score.fullTime.awayTeam}</div>&nbsp;:&nbsp;
-                    <div>{match.score.fullTime.homeTeam}</div>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <div className={styles.score}>
-                    <div>{match.homeTeam.name}</div>&nbsp;:&nbsp;
-                    <div>{match.awayTeam.name}</div>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-    </div>
+    <Table
+      columns={[
+        {
+          dataIndex: 'score',
+          key: 'score',
+          render(score: Score) {
+            if (
+              score.fullTime.awayTeam == null ||
+              score.fullTime.homeTeam == null
+            ) {
+              return null;
+            }
+
+            return (
+              <TableCellSpace
+                left={score.fullTime.awayTeam.toString()}
+                right={score.fullTime.homeTeam.toString()}
+              />
+            );
+          },
+          title: 'Счёт',
+        },
+        {
+          dataIndex: 'name',
+          key: 'name',
+          render({ awayTeam, homeTeam }) {
+            if (awayTeam == null || homeTeam == null) {
+              return null;
+            }
+
+            return (
+              <TableCellSpace left={awayTeam.name} right={homeTeam.name} />
+            );
+          },
+          title: 'Команды участники',
+        },
+      ]}
+      dataSource={data?.matches.map((match) => ({
+        key: match.id,
+        name: {
+          awayTeam: match.awayTeam,
+          homeTeam: match.homeTeam,
+        },
+        score: match.score,
+      }))}
+      loading={isLoading}
+    />
   );
+  //   return (
+  //     <div>
+  //       <TableContainer component={Paper}>
+  //         <Table>
+  //           <TableHead>
+  //             <TableRow>
+  //               <TableCell>Счёт</TableCell>
+  //               <TableCell>Команды участники</TableCell>
+  //             </TableRow>
+  //           </TableHead>
+  //           <TableBody>
+  //             {data?.matches.map((match) => (
+  //               <TableRow key={match.id}>
+  //                 <TableCell component="th" scope="row">
+  //                   {match.score.fullTime.awayTeam != null &&
+  //                     match.score.fullTime.homeTeam != null && (
+  //                       <TableCellSpace
+  //                         left={match.score.fullTime.awayTeam.toString()}
+  //                         right={match.score.fullTime.homeTeam.toString()}
+  //                       />
+  //                     )}
+  //                 </TableCell>
+  //                 <TableCell>
+  //                   <TableCellSpace
+  //                     left={match.homeTeam.name}
+  //                     right={match.awayTeam.name}
+  //                   />
+  //                 </TableCell>
+  //               </TableRow>
+  //             ))}
+  //           </TableBody>
+  //         </Table>
+  //       </TableContainer>
+  //     </div>
+  //   );
 };

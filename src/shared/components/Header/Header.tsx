@@ -1,30 +1,23 @@
-import TabContext from '@mui/lab/TabContext';
-import TabList from '@mui/lab/TabList';
-import Box from '@mui/material/Box';
-import Tab from '@mui/material/Tab';
+import { Tabs } from 'antd';
 import { useState, VFC } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+
+const { TabPane } = Tabs;
 
 export const Header: VFC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [value, setValue] = useState(location.pathname);
 
-  const handleChange = (_event: any, newValue: string) => {
+  const handleChange = (newValue: string) => {
     navigate(newValue);
     setValue(newValue);
   };
 
   return (
-    <Box sx={{ typography: 'body1', width: '100%' }}>
-      <TabContext value={value}>
-        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-          <TabList onChange={handleChange}>
-            <Tab label="Список лиг/соревнований" value="/competitions" />
-            <Tab label="Список команд" value="/teams" />
-          </TabList>
-        </Box>
-      </TabContext>
-    </Box>
+    <Tabs defaultActiveKey={value} onChange={handleChange}>
+      <TabPane key="/competitions" tab="Список лиг/соревнований" />
+      <TabPane key="/teams" tab="Список команд" />
+    </Tabs>
   );
 };

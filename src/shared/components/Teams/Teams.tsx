@@ -1,21 +1,10 @@
-import {
-  CircularProgress,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-} from '@mui/material';
+import { Table } from 'antd';
+import { ColumnFilterItem } from 'antd/lib/table/interface';
 import { VFC } from 'react';
-import { useQuery, useQueryClient } from 'react-query';
+import { useQuery } from 'react-query';
 import { useNavigate } from 'react-router-dom';
 
 import { useAppContext } from '../../hooks/useAppContext';
-import { TableCellName } from '../TableCellName';
-
-import styles from './Teams.scss';
 
 export interface Filters {
   areas: number[];
@@ -53,65 +42,81 @@ export interface RootObject {
 export const Teams: VFC = () => {
   const { fetchService } = useAppContext();
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
 
   const { data, isLoading } = useQuery('teams', () =>
     fetchService.fetch<RootObject>('https://api.football-data.org/v2/teams/'),
   );
 
-  if (isLoading) {
-    return (
-      <div className={styles.container}>
-        <CircularProgress color="secondary" />
-      </div>
-    );
-  }
-
+  const handleRowClick = (id: number) => () => {
+    navigate(`/teams/${id}/matches`);
+  };
   return (
-    <div>
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>Название команды</TableCell>
-              <TableCell>Адрес</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {data?.teams.map((team) => (
-              <TableRow
-                hover
-                key={team.id}
-                onClick={async () => {
-                  try {
-                    const resp = await queryClient.fetchQuery('matches', () =>
-                      fetchService.fetch(
-                        `http://api.football-data.org/v2/teams/${team.id}/matches`,
-                      ),
-                    );
-                    if ('errorCode' in resp) {
-                      // eslint-disable-next-line no-console
-                      console.warn('======?>', resp);
-                    } else {
-                      navigate(`/teams/${team.id}/matches`);
-                    }
-                  } catch (e) {
-                    // eslint-disable-next-line no-console
-                    console.warn(e);
-                  }
-                }}
-              >
-                <TableCell component="th" scope="row">
-                  <TableCellName reverse name={team.name} url={team.crestUrl} />
-                </TableCell>
-                <TableCell component="th" scope="row">
-                  {team.address}
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-    </div>
+    <Table
+      columns={[
+        {
+          dataIndex: 'name',
+          filterSearch: true,
+          filters: data?.teams.map(
+            (team): ColumnFilterItem => ({
+              text: team.name,
+              value: team.name,
+            }),
+          ),
+          key: 'name',
+          onFilter: (value, record) => record.name.startsWith(value as string),
+          sorter: (a, b) => {
+            if (a.name < b.name) {
+              return -1;
+            }
+            if (a.name > b.name) {
+              return 1;
+            }
+
+            return 0;
+          },
+          title: 'Название команды',
+        },
+        {
+          dataIndex: 'crestUrl',
+          key: 'crestUrl',
+          render: (_text, record) => (
+            <img alt="logo-team" height="50px" src={record.url} width="50px" />
+          ),
+          title: 'Логотип команды',
+        },
+        {
+          dataIndex: 'area',
+          key: 'area',
+          showSorterTooltip: {
+            title: 'Для сортировки нажать',
+          },
+          sorter: (a, b) => {
+            if (a.area < b.area) {
+              return -1;
+            }
+            if (a.area > b.area) {
+              return 1;
+            }
+
+            return 0;
+          },
+          title: 'Страна',
+        },
+      ]}
+      dataSource={data?.teams.reduce((accumulator, team) => {
+        accumulator.push({
+          area: team.area.name,
+          key: team.id,
+          name: team.name,
+          url: team.crestUrl,
+        });
+
+        return accumulator;
+      }, Array.of<{ key: number; name: string; area: string; url: string }>())}
+      loading={isLoading}
+      onRow={(record) => ({
+        onClick: handleRowClick(record.key),
+      })}
+    />
   );
 };

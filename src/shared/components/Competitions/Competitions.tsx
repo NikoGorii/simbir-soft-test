@@ -1,25 +1,11 @@
-import {
-  CircularProgress,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-} from '@mui/material';
-// eslint-disable-next-line import/no-duplicates
-import { format } from 'date-fns';
-// eslint-disable-next-line import/no-duplicates
-import { ru } from 'date-fns/locale';
+import { notification, Table } from 'antd';
+import { ColumnFilterItem } from 'antd/lib/table/interface';
+import { isBefore, isSameDay, parseISO } from 'date-fns';
 import { VFC } from 'react';
 import { useQuery, useQueryClient } from 'react-query';
 import { useNavigate } from 'react-router-dom';
 
 import { useAppContext } from '../../hooks/useAppContext';
-import { TableCellName } from '../TableCellName';
-
-import styles from './Competitions.module.scss';
 
 export type Filters = Record<string, string>;
 
@@ -78,79 +64,113 @@ export const Competitions: VFC = () => {
 
   const { data, isLoading } = useQuery('competitions', () =>
     fetchService.fetch<RootObject>(
-      'https://api.football-data.org/v2/competitions/',
+      'https://api.football-data.org/v2/competitions',
     ),
   );
 
-  if (isLoading) {
-    return (
-      <div className={styles.container}>
-        <CircularProgress color="secondary" />
-      </div>
-    );
-  }
-
   return (
-    <div>
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>Название лиги</TableCell>
-              <TableCell>Дивизион</TableCell>
-              <TableCell>Дата соревнования</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {data?.competitions.map((competition) => (
-              <TableRow
-                hover
-                key={competition.id}
-                onClick={async () => {
-                  try {
-                    const resp = await queryClient.fetchQuery(
-                      'competitionMatches',
-                      () =>
-                        fetchService.fetch(
-                          `http://api.football-data.org/v2/competitions/${competition.id}/matches`,
-                        ),
-                    );
-                    if ('errorCode' in resp) {
-                      // eslint-disable-next-line no-console
-                      console.warn('======?>', resp);
-                    } else {
-                      navigate(`/competitions/${competition.id}/matches`);
-                    }
-                  } catch (e) {
-                    // eslint-disable-next-line no-console
-                    console.warn(e);
-                  }
-                }}
-              >
-                <TableCell component="th" scope="row">
-                  <TableCellName
-                    name={competition.name}
-                    url={competition.emblemUrl}
-                  />
-                </TableCell>
-                <TableCell>
-                  {competition.plan in ECurrentSeasonNames
-                    ? ECurrentSeasonNames[competition.plan]
-                    : competition.plan}
-                </TableCell>
-                <TableCell>
-                  {!!competition.currentSeason?.startDate &&
-                    format(
-                      new Date(competition.currentSeason.startDate),
-                      'dd-MMM-yyyy',
-                      { locale: ru },
-                    )}
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-    </div>
+    <Table
+      columns={[
+        {
+          dataIndex: 'name',
+          filterSearch: true,
+          filters: data?.competitions.map(
+            (competition): ColumnFilterItem => ({
+              text: competition.name,
+              value: competition.name,
+            }),
+          ),
+          key: 'name',
+          onFilter: (value, record) => record.name.startsWith(value as string),
+          sorter: (a, b) => {
+            if (a.name < b.name) {
+              return -1;
+            }
+            if (a.name > b.name) {
+              return 1;
+            }
+
+            return 0;
+          },
+          title: 'Название лиги',
+        },
+        {
+          dataIndex: 'plan',
+          key: 'plan',
+          showSorterTooltip: {
+            title: 'Для сортировки нажать',
+          },
+          sorter: (a, b) => {
+            if (a.plan < b.plan) {
+              return -1;
+            }
+            if (a.plan > b.plan) {
+              return 1;
+            }
+
+            return 0;
+          },
+          title: 'Дивизион',
+        },
+        {
+          dataIndex: 'date',
+          key: 'date',
+          sorter: (a, b) => {
+            if (!a.date || !b.date) {
+              return -1;
+            }
+
+            const pA = parseISO(a.date);
+            const pB = parseISO(b.date);
+
+            if (isSameDay(pA, pB)) {
+              return 0;
+            }
+
+            if (isBefore(pA, pB)) {
+              return 1;
+            }
+
+            return -1;
+          },
+          title: 'Дата соревнования',
+        },
+      ]}
+      dataSource={data?.competitions.reduce((accumulator, competition) => {
+        if (competition.plan === 'TIER_ONE') {
+          accumulator.push({
+            date: competition.currentSeason?.startDate ?? null,
+            key: competition.id,
+            name: competition.name,
+            plan:
+              competition.plan in ECurrentSeasonNames
+                ? ECurrentSeasonNames[competition.plan]
+                : competition.plan,
+          });
+        }
+
+        return accumulator;
+      }, Array.of<{ date: string | null; key: number; name: string; plan: string }>())}
+      loading={isLoading}
+      onRow={(record) => ({
+        async onClick() {
+          const resp = await queryClient.fetchQuery('competitionMatches', () =>
+            fetchService.fetch(
+              `http://api.football-data.org/v2/competitions/${record.key}/matches`,
+            ),
+          );
+          if ('errorCode' in resp) {
+            notification.open({
+              description:
+                'Для типа вашего аккаунта данное соревнование недоступно, преобретите платную подписку',
+              message: 'Ошибка запроса соревнования',
+              type: 'error',
+            });
+          } else {
+            navigate(`/competitions/${record.key}/matches`);
+          }
+        },
+      })}
+    />
   );
 };

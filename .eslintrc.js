@@ -4,7 +4,12 @@ module.exports = {
     jest: true,
     node: true,
   },
-  extends: ['airbnb', 'airbnb/hooks', 'plugin:@typescript-eslint/recommended'],
+  extends: [
+    'airbnb',
+    'airbnb/hooks',
+    'plugin:@typescript-eslint/recommended',
+    'prettier',
+  ],
   overrides: [
     {
       files: ['config/**/*.ts', 'jest.config.js'],
