@@ -7,6 +7,8 @@ import { useNavigate } from 'react-router-dom';
 
 import { useAppContext } from '../../hooks/useAppContext';
 
+import styles from './Competitions.module.scss';
+
 export type Filters = Record<string, string>;
 
 export interface Area {
@@ -152,6 +154,7 @@ export const Competitions: VFC = () => {
         return accumulator;
       }, Array.of<{ date: string | null; key: number; name: string; plan: string }>())}
       loading={isLoading}
+      rowClassName={styles.row}
       onRow={(record) => ({
         async onClick() {
           const resp = await queryClient.fetchQuery('competitionMatches', () =>

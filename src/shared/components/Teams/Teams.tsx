@@ -6,6 +6,8 @@ import { useNavigate } from 'react-router-dom';
 
 import { useAppContext } from '../../hooks/useAppContext';
 
+import styles from './Teams.module.scss';
+
 export interface Filters {
   areas: number[];
   permission: string;
@@ -114,6 +116,7 @@ export const Teams: VFC = () => {
         return accumulator;
       }, Array.of<{ key: number; name: string; area: string; url: string }>())}
       loading={isLoading}
+      rowClassName={styles.row}
       onRow={(record) => ({
         onClick: handleRowClick(record.key),
       })}
